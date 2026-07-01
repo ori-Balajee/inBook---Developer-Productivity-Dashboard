@@ -86,7 +86,9 @@ export const mongoClient = {
         return apiRequest('/snippets');
     },
     async createSnippet(snippet) {
-        return apiRequest('/snippets', { method: 'POST', body: JSON.stringify(snippet) });
+        return apiRequest('/snippets', { method: 'POST', headers: {
+            'Content-Type': 'application/json',
+        }, body: JSON.stringify(snippet) });
     },
     async updateSnippet(id, updates) {
         return apiRequest(`/snippets/${id}`, { method: 'PUT', body: JSON.stringify(updates) });

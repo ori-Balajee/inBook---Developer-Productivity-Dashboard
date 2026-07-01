@@ -5,10 +5,10 @@ import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
-import projectRoutes from './routes/projects.js';
-import sessionRoutes from './routes/sessions.js';
-import logRoutes from './routes/logs.js';
-import snippetRoutes from './routes/snippets.js';
+import projectRoutes from './routes/Projects.js';
+import sessionRoutes from './routes/Sessions.js';
+import logRoutes from './routes/Logs.js';
+import snippetRoutes from './routes/Snippets.js';
 
 dotenv.config();
 

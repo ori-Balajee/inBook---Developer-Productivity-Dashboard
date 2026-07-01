@@ -1,9 +1,5 @@
 import mongoose from 'mongoose';
 
-/**
- * Code Snippet Schema
- * Represents a saved code snippet for reference
- */
 const snippetSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -24,7 +20,7 @@ const snippetSchema = new mongoose.Schema({
     required: [true, 'Code is required'],
     maxlength: [50000, 'Code cannot exceed 50000 characters'],
   },
-  language: {
+  snippetLanguage: {
     type: String,
     required: [true, 'Language is required'],
     enum: [
@@ -37,7 +33,7 @@ const snippetSchema = new mongoose.Schema({
     index: true,
   },
   tags: [{
-    type: String,
+    type: [String],
     trim: true,
     lowercase: true,
     maxlength: [30, 'Tag cannot exceed 30 characters'],
@@ -77,13 +73,13 @@ snippetSchema.index({
 });
 
 // Compound indexes for efficient queries
-snippetSchema.index({ language: 1, createdAt: -1 });
+snippetSchema.index({ snippetLanguage: 1, createdAt: -1 });
 snippetSchema.index({ isFavorite: 1, createdAt: -1 });
 snippetSchema.index({ tags: 1 });
 
 // Static method to search snippets
 snippetSchema.statics.search = async function(query, options = {}) {
-  const { language, tags, isFavorite, limit = 20, skip = 0 } = options;
+  const { snippetLanguage, tags, isFavorite, limit = 20, skip = 0 } = options;
 
   const filter = {};
 
@@ -91,8 +87,8 @@ snippetSchema.statics.search = async function(query, options = {}) {
     filter.$text = { $search: query };
   }
 
-  if (language) {
-    filter.language = language;
+  if (snippetLanguage) {
+    filter.snippetLanguage = snippetLanguage;
   }
 
   if (tags && tags.length > 0) {
@@ -124,7 +120,7 @@ snippetSchema.statics.getLanguageStats = async function() {
   return this.aggregate([
     {
       $group: {
-        _id: '$language',
+        _id: '$snippetLanguage',
         count: { $sum: 1 },
       },
     },

@@ -3,6 +3,7 @@ import { TrendingUp, Clock, FolderOpen, Target, Flame, BarChart3 } from 'lucide-
 import { mongoClient } from '../lib/mongodbClient';
 
 export function Dashboard({ sessions, projects, logs, onRefresh }) {
+    const [animate, setAnimate] = useState(false);
     const [stats, setStats] = useState({
         totalHoursThisWeek: 0,
         totalHoursThisMonth: 0,
@@ -10,6 +11,9 @@ export function Dashboard({ sessions, projects, logs, onRefresh }) {
         averageSessionDuration: 0,
         streakDays: 0,
     });
+
+
+
 
     useEffect(() => {
         mongoClient.getStats().then(data => {
@@ -49,6 +53,17 @@ export function Dashboard({ sessions, projects, logs, onRefresh }) {
         }
 
         return weekData;
+    }, [sessions]);
+
+
+    useEffect(() => {
+        setAnimate(false);
+
+        const timer = setTimeout(() => {
+            setAnimate(true);
+        }, 50);
+
+        return () => clearTimeout(timer);
     }, [sessions]);
 
     const maxHours = Math.max(...chartData.map(d => d.hours), 1);
@@ -110,21 +125,62 @@ export function Dashboard({ sessions, projects, logs, onRefresh }) {
                         <TrendingUp className="w-5 h-5 text-primary-400" />
                         Weekly Activity
                     </h3>
-                    <div className="flex items-end gap-2 h-40">
-                        {chartData.map((d, i) => (
-                            <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                                <div className="relative w-full bg-slate-800/50 rounded-t-sm" style={{ height: '120px' }}>
+                    <div className="glass-card p-6">
+                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                            <Flame className="w-5 h-5 text-warm-400" />
+                            Activity Streak
+                        </h3>
+
+                        <div className="flex items-center gap-6">
+                            <div className="relative w-24 h-24 flex items-center justify-center">
+                                <div className="absolute inset-0 rounded-full border-8 border-slate-800"></div>
+
+                                <div
+                                    className="absolute inset-0 rounded-full border-8 border-warm-400"
+                                    style={{
+                                        clipPath: `inset(${100 - Math.min(
+                                            (stats.streakDays / 30) * 100,
+                                            100
+                                        )}% 0 0 0)`
+                                    }}
+                                ></div>
+
+                                <div className="text-center">
+                                    <p className="text-2xl font-bold text-slate-100">
+                                        {stats.streakDays}
+                                    </p>
+                                    <p className="text-xs text-slate-500">
+                                        Days
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex-1">
+                                <p className="text-slate-300 font-medium">
+                                    Current streak
+                                </p>
+
+                                <p className="text-sm text-slate-500 mt-1">
+                                    Keep logging work daily to grow your streak.
+                                </p>
+
+                                <div className="mt-4 h-2 bg-slate-800 rounded-full overflow-hidden">
                                     <div
-                                        className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-primary-600 to-primary-400 rounded-t-sm transition-all duration-500"
+                                        className="h-full bg-linear-to-r from-warm-500 to-red-500 rounded-full"
                                         style={{
-                                            height: `${(d.hours / maxHours) * 100}%`,
-                                            animationDelay: `${i * 0.1}s`,
+                                            width: `${Math.min(
+                                                (stats.streakDays / 30) * 100,
+                                                100
+                                            )}%`
                                         }}
                                     />
                                 </div>
-                                <span className="text-xs text-slate-500">{d.day}</span>
+
+                                <p className="text-xs text-slate-500 mt-2">
+                                    Goal: 30 day streak
+                                </p>
                             </div>
-                        ))}
+                        </div>
                     </div>
                     <div className="flex justify-between mt-4 text-sm">
                         <span className="text-slate-500">Total: {stats.totalHoursThisWeek}h</span>

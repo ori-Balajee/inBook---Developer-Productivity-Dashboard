@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Code, Search, Tag, Star, Trash2, Copy, Plus, Check } from 'lucide-react';
 import { mongoClient } from '../lib/mongodbClient';
 
-const LANGUAGES = ['JavaScript', 'TypeScript', 'Python', 'CSS', 'HTML', 'SQL', 'JSON', 'Bash'];
+const snippetLanguageS = ['JavaScript', 'TypeScript', 'Python', 'CSS', 'HTML', 'SQL', 'JSON', 'Bash'];
 
 export function CodeSnippetManager({ snippets, onDataRefresh }) {
   const [search, setSearch] = useState('');
@@ -12,7 +12,7 @@ export function CodeSnippetManager({ snippets, onDataRefresh }) {
     title: '',
     description: '',
     code: '',
-    language: 'JavaScript',
+    snippetLanguage: 'JavaScript',
     tags: '',
   });
   const [copiedId, setCopiedId] = useState(null);
@@ -21,7 +21,7 @@ export function CodeSnippetManager({ snippets, onDataRefresh }) {
   const filteredSnippets = snippets.filter(s => {
     const matchesSearch = s.title.toLowerCase().includes(search.toLowerCase()) ||
       s.description?.toLowerCase().includes(search.toLowerCase());
-    const matchesLang = !filterLang || s.language === filterLang;
+    const matchesLang = !filterLang || s.snippetLanguage === filterLang;
     return matchesSearch && matchesLang;
   });
 
@@ -32,9 +32,11 @@ export function CodeSnippetManager({ snippets, onDataRefresh }) {
       tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
       isFavorite: false,
     });
-    setFormData({ title: '', description: '', code: '', language: 'JavaScript', tags: '' });
+
+    await onDataRefresh();
+
+    setFormData({ title: '', description: '', code: '', snippetLanguage: 'JavaScript', tags: '' });
     setShowForm(false);
-    onDataRefresh();
   };
 
   const handleCopy = async (code, id) => {
@@ -58,6 +60,7 @@ export function CodeSnippetManager({ snippets, onDataRefresh }) {
   return (
     <div className="space-y-6">
       <div className="glass-card p-6">
+        {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold flex items-center gap-2">
             <Code className="w-5 h-5 text-primary-400" />
@@ -69,6 +72,7 @@ export function CodeSnippetManager({ snippets, onDataRefresh }) {
           </button>
         </div>
 
+        {/* Search */}
         <div className="flex gap-4 mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
@@ -85,8 +89,8 @@ export function CodeSnippetManager({ snippets, onDataRefresh }) {
             onChange={(e) => setFilterLang(e.target.value)}
             className="input-field w-40"
           >
-            <option value="">All Languages</option>
-            {LANGUAGES.map(lang => (
+            <option value="">Languages</option>
+            {snippetLanguageS.map(lang => (
               <option key={lang} value={lang}>{lang}</option>
             ))}
           </select>
@@ -107,13 +111,13 @@ export function CodeSnippetManager({ snippets, onDataRefresh }) {
             </div>
             <div className="flex gap-4">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-slate-300 mb-2">Language</label>
+                <label className="block text-sm font-medium text-slate-300 mb-2">snippet Language</label>
                 <select
-                  value={formData.language}
-                  onChange={(e) => setFormData({ ...formData, language: e.target.value })}
+                  value={formData.snippetLanguage}
+                  onChange={(e) => setFormData({ ...formData, snippetLanguage: e.target.value })}
                   className="input-field"
                 >
-                  {LANGUAGES.map(lang => (
+                  {snippetLanguageS.map(lang => (
                     <option key={lang} value={lang}>{lang}</option>
                   ))}
                 </select>
@@ -176,13 +180,13 @@ export function CodeSnippetManager({ snippets, onDataRefresh }) {
                       <div className="flex items-center gap-2">
                         <h3 className="font-medium text-slate-200">{snippet.title}</h3>
                         <span className="px-2 py-0.5 text-xs bg-primary-600/30 text-primary-300 rounded">
-                          {snippet.language}
+                          {snippet.snippetLanguage}
                         </span>
                         {snippet.isFavorite && <Star className="w-4 h-4 text-warm-400 fill-warm-400" />}
                       </div>
                       <p className="text-sm text-slate-500 mt-1">{snippet.description}</p>
                       <div className="flex flex-wrap gap-1 mt-2">
-                        {snippet.tags.map(tag => (
+                        {snippet.tags?.map(tag => (
                           <span key={tag} className="px-2 py-0.5 text-xs bg-slate-700/50 text-slate-400 rounded">
                             {tag}
                           </span>
